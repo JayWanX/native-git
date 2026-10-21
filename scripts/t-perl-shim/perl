@@ -1,0 +1,57 @@
+#!/bin/sh
+# Shim: give the git test suite a perl, whichever flavor this machine has.
+#
+#   1. Strawberry (native Windows) perl: run it from MSYS sh, converting
+#      MSYS-style path arguments to Windows paths.
+#   2. Otherwise an MSYS perl (/usr/bin/perl, present when the suite runs
+#      under a real Git Bash whose MSYS root carries perl): exec it
+#      VERBATIM — no conversion, exactly like upstream's PERL_PATH.
+#
+# NOTE: arguments must be passed to perl VERBATIM — perl one-liners from
+# the test suite routinely contain backslashes (e.g. hex2oct's
+#   perl -ne 'printf "\\%03o", hex for /../g'
+# ) and an earlier version of this shim rebuilt the command line as a
+# quoted string + eval, which let the shell re-parse those backslashes
+# and corrupted the perl code. Round-trip through positional parameters
+# instead; never build a command string.
+
+if [ -x /c/Strawberry/perl/bin/perl.exe ]; then
+    PERL_REAL=/c/Strawberry/perl/bin/perl.exe
+elif [ -x /usr/bin/perl ]; then
+    # MSYS perl: POSIX paths are understood natively, wrappers consume
+    # GITPERLLIB themselves, so pass everything through untouched.
+    exec /usr/bin/perl "$@"
+else
+    echo "t-perl-shim: no perl found (Strawberry or /usr/bin/perl)" >&2
+    exit 127
+fi
+
+n=$#
+i=0
+while [ "$i" -lt "$n" ]; do
+    a=$1
+    shift
+    case "$a" in
+    -I/*)
+        w=$(cygpath -w "${a#-I}" 2>/dev/null)
+        [ -n "$w" ] && a="-I$w"
+        ;;
+    /*)
+        # A bare absolute MSYS path (script file, etc.) -> Windows path.
+        w=$(cygpath -w "$a" 2>/dev/null)
+        [ -n "$w" ] && a="$w"
+        ;;
+    esac
+    set -- "$@" "$a"
+    i=$((i + 1))
+done
+
+# Git's perl lib (GITPERLLIB / PERL5LIB) is an MSYS path for Windows perl.
+if [ -n "$GITPERLLIB" ]; then
+    w=$(cygpath -w "$GITPERLLIB" 2>/dev/null)
+    if [ -n "$w" ]; then
+        export PERL5LIB="$w${PERL5LIB:+;$PERL5LIB}"
+    fi
+fi
+
+exec "$PERL_REAL" "$@"
