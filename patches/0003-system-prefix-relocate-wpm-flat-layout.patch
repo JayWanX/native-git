@@ -3,14 +3,14 @@ Subject: [PATCH] system_prefix: self-locate the wpm relocatable payload
 
 Justification (see patches/README.md): in the wpm "flat" package layout
 git.exe is installed to the shared <root>/usr/bin while the payload lives
-at <root>/opt/niugit/mingw64. The suffix strips then compute <root>/usr
+at <root>/opt/git/mingw64. The suffix strips then compute <root>/usr
 as the runtime prefix, a directory without libexec/git-core, so the exec
 path, the template dir and ../etc/gitconfig all silently miss and git
 falls back to system-wide defaults (or fails outright).
 
 Validate the stripped prefix against <prefix>/<GIT_EXEC_PATH> and, when
 that does not hold, walk up from the executable directory looking for a
-payload marker (opt/niugit/mingw64, mingw64) before falling back to the
+payload marker (opt/git/mingw64, mingw64) before falling back to the
 original chain. Normal MinGit and build-tree layouts keep their existing
 prefix byte for byte: there the strip validates on the first try and the
 probe never runs.
@@ -26,7 +26,7 @@ probe never runs.
 +/*
 + * niubash/wpm relocatable-binary probe: git.exe may be installed into a
 + * shared bin directory (e.g. <root>/usr/bin) while the payload lives at
-+ * <root>/opt/niugit/mingw64. There the suffix strips in
++ * <root>/opt/git/mingw64. There the suffix strips in
 + * system_prefix() compute <root>/usr as the prefix, a directory without
 + * libexec/git-core, which silently breaks the exec path, the template
 + * dir and ../etc/gitconfig. Walk up from the executable dir looking for
@@ -43,7 +43,7 @@ probe never runs.
 +	strbuf_addstr(&dir, executable_dirname);
 +	for (up = 0; up < 4; up++) {
 +		static const char *const payloads[] = {
-+			"opt/niugit/mingw64", "mingw64"
++			"opt/git/mingw64", "mingw64"
 +		};
 +		const char *slash;
 +		size_t i;
