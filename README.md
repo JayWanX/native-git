@@ -177,3 +177,20 @@ python scripts/build.py --arch arm64   # needs the "MSVC ARM64 build tools"
 
 Source code is NEVER committed here: CI pulls the upstream tarball and applies
 `patches/`. License: GPLv2 (upstream git); keep this repo patch-only.
+
+## Attribution
+
+This repository is a **patch-only fork** of
+[git-for-windows/git](https://github.com/git-for-windows/git), renamed
+`native-git` (it was `niu-git` before). It contains no git source code of its
+own: `src/` is fetched from upstream at build time and only the files under
+`patches/` are this repository's contribution. Upstream git is licensed
+**GPL-2.0**; every binary built here therefore carries that license, and its
+complete corresponding source is the upstream tarball pinned by `GIT_TAG` plus
+`GIT_TARBALL_SHA256` together with the patches in `patches/`. Both are
+published — fetch and apply them to reproduce the exact binary.
+
+| Component | Upstream | License |
+| --- | --- | --- |
+| the git binary | [git-for-windows/git](https://github.com/git-for-windows/git) | GPL-2.0 |
+| build/patch tooling in this repo | this repository's own work | MIT-compatible, see `patches/README.md` |
