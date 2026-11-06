@@ -1,0 +1,36 @@
+{
+  "name": "native-git",
+  "version": "latest",
+  "description": "Native Windows git without MSYS (native-git build); schannel-only TLS, no bundled shell/perl, hooks run via sh found on PATH; accepts POSIX-shaped path args (/d/...) via fallback conversion; static zlib/iconv, bare usr/bin/git.exe self-locates (flat layout, no shim).",
+  "kind": "external",
+  "category": "developer",
+  "license": "GPL-2.0-only",
+  "homepage": "https://github.com/JayWanX/native-git",
+  "commands": [
+    "git"
+  ],
+  "artifacts": {
+    "windows-x64": {
+      "type": "zip",
+      "urls": [
+        "https://github.com/JayWanX/native-git/releases/latest/download/native-git-win-x64.zip"
+      ],
+      "files": [
+        {
+          "from": "mingw64/",
+          "to": "opt/git/mingw64/"
+        },
+        {
+          "from": "etc/",
+          "to": "opt/git/etc/"
+        },
+        {
+          "from": "mingw64/bin/git.exe",
+          "to": "git.exe"
+        }
+      ],
+      "size": 33147311,
+      "layout": "flat"
+    }
+  }
+}
